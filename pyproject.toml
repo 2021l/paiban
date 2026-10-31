@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "paiban"
+dynamic = ["version"]
+description = "中文排版自动修正：中西文之间加空格、清理全角标点两侧空格、去掉行尾空白，代码块与链接自动保护。"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "2021l" }]
+keywords = ["cjk", "chinese", "typography", "markdown", "spacing", "linter", "paiban"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Chinese (Simplified)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Text Processing",
+    "Topic :: Text Processing :: Markup",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+paiban = "paiban.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/2021l/paiban"
+Issues = "https://github.com/2021l/paiban/issues"
+
+[tool.hatch.version]
+path = "src/paiban/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/paiban"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
