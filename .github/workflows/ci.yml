@@ -33,6 +33,9 @@ jobs:
       - name: 运行测试
         run: python -m pytest
 
+      - name: 演示页引擎测试（Node）
+        run: node --test tests/engine.test.cjs
+
       - name: 命令行冒烟测试
         run: |
           printf '使用Python编写\n' | python -m paiban

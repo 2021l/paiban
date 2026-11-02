@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>paiban · 中文排版在线演示</title>
+<meta name="description" content="paiban 中文排版修正器在线演示：中西文之间加空格、清理全角标点两侧空白、删除行尾空白，代码块与链接自动保护。">
+<style>
+:root {
+  --bg: #f5f6f8; --card: #ffffff; --border: #e3e6ea;
+  --text: #1f2328; --muted: #6b7280;
+  --accent: #2563eb; --accent-ink: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115; --card: #171a21; --border: #2a2f3a;
+    --text: #e6e8ee; --muted: #9aa3b2;
+    --accent: #4c8dff; --accent-ink: #0b1220;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background: var(--bg); color: var(--text);
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 26px 16px 44px; }
+header { text-align: center; margin-bottom: 20px; }
+h1 { margin: 0 0 8px; font-size: 27px; letter-spacing: .5px; }
+h1 .dot { color: var(--accent); }
+.sub { margin: 0; color: var(--muted); font-size: 14px; }
+main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.pane {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px; display: flex; flex-direction: column;
+}
+.pane-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.pane-head h2 { margin: 0; font-size: 15px; flex: 1; }
+button {
+  font: inherit; font-size: 13px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text); border-radius: 8px;
+  padding: 5px 12px; cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+textarea {
+  width: 100%; min-height: 340px; resize: vertical;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--text); padding: 10px;
+  font: 14px/1.6 ui-monospace, Consolas, "Courier New", monospace;
+  outline: none;
+}
+textarea:focus { border-color: var(--accent); }
+.controls {
+  grid-column: 1 / -1; display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 14px;
+}
+.controls label { font-size: 13px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+#stats { color: var(--muted); font-size: 13px; margin-left: auto; }
+.out {
+  min-height: 340px; white-space: pre-wrap; word-break: break-all;
+  font: 14px/1.6 ui-monospace, Consolas, "Courier New", monospace;
+  margin: 0; padding: 10px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px; overflow: auto;
+}
+.del { background: #ffebe9; color: #82071e; display: block; }
+.add { background: #dafbe1; color: #116329; display: block; }
+.ctx { color: var(--muted); display: block; }
+@media (prefers-color-scheme: dark) {
+  .del { background: #3d1d22; color: #ffa198; }
+  .add { background: #12261e; color: #7ee2a8; }
+}
+.tabs { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.tabs button { border: none; border-radius: 0; padding: 5px 14px; }
+.tabs button.active { background: var(--accent); color: var(--accent-ink); }
+footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 24px; }
+footer a { color: var(--accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>paiban<span class="dot"> · </span>中文排版在线演示</h1>
+    <p class="sub">粘贴文本，立即看到修正结果 —— 浏览器里的 JS 引擎与 Python 版 core.py 规则一一对应</p>
+  </header>
+
+  <main>
+    <section class="pane">
+      <div class="pane-head">
+        <h2>输入</h2>
+        <button id="sample">载入示例</button>
+        <button id="clear">清空</button>
+      </div>
+      <textarea id="input" placeholder="在这里粘贴要排版的文本…"></textarea>
+    </section>
+
+    <section class="pane">
+      <div class="pane-head">
+        <h2>输出</h2>
+        <div class="tabs">
+          <button id="tab-result" class="active">结果</button>
+          <button id="tab-diff">差异</button>
+        </div>
+        <button id="copy">复制结果</button>
+      </div>
+      <pre class="out" id="out"></pre>
+    </section>
+
+    <section class="controls">
+      <label><input type="checkbox" id="opt-space" checked>中西文空格</label>
+      <label><input type="checkbox" id="opt-digits" checked>数字空格</label>
+      <label><input type="checkbox" id="opt-cjk" checked>汉字间空格</label>
+      <label><input type="checkbox" id="opt-punct" checked>标点清理</label>
+      <label><input type="checkbox" id="opt-trailing" checked>行尾空白</label>
+      <label><input type="checkbox" id="opt-protect" checked>保护代码/链接</label>
+      <button id="run" class="primary">排版</button>
+      <span id="stats"></span>
+    </section>
+  </main>
+
+  <footer>
+    由 <a href="https://github.com/2021l/paiban">github.com/2021l/paiban</a> 驱动 ·
+    <a href="https://github.com/2021l/paiban/blob/main/src/paiban/core.py">Python 版核心</a> ·
+    <a href="https://github.com/2021l/paiban/blob/main/docs/paiban.js">JS 版引擎</a>
+  </footer>
+</div>
+
+<script src="./paiban.js"></script>
+<script>
+(function () {
+  "use strict";
+  var fix = window.paiban.fix;
+  var input = document.getElementById("input");
+  var out = document.getElementById("out");
+  var stats = document.getElementById("stats");
+  var mode = "result";
+  var lastFixed = "";
+
+  var SAMPLE = [
+    "paiban是一个零依赖的中文排版工具，它会把「使用Python编写」修正成「使用 Python 编写」。",
+    "",
+    "第3章介绍这些规则 ： 中西文加空格、合并 汉字 之间 的空格、清理（ 标点 ）两侧空白。   ",
+    "行尾的多余空格会被删掉。",
+    "",
+    "代码和链接原样保留：",
+    "```python",
+    "使用Python编写第一行   ",
+    "```",
+    "执行`git status`，再看 https://example.com/path?a=1 。",
+    ""
+  ].join("\n");
+
+  function opts() {
+    return {
+      space: document.getElementById("opt-space").checked,
+      digits: document.getElementById("opt-digits").checked,
+      cjkSpaces: document.getElementById("opt-cjk").checked,
+      punctuation: document.getElementById("opt-punct").checked,
+      trailing: document.getElementById("opt-trailing").checked,
+      protect: document.getElementById("opt-protect").checked
+    };
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  function diffUnified(aText, bText) {
+    var a = aText.split(/\r\n|\r|\n/);
+    var b = bText.split(/\r\n|\r|\n/);
+    if (a.length * b.length > 4e6) return [["...", "文本太大，略过差异展示"]];
+    var n = a.length, m = b.length;
+    var dp = [];
+    for (var i = 0; i <= n; i++) dp.push(new Array(m + 1).fill(0));
+    for (var i = n - 1; i >= 0; i--) {
+      for (var j = m - 1; j >= 0; j--) {
+        dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+      }
+    }
+    var rows = [], i = 0, j = 0;
+    while (i < n && j < m) {
+      if (a[i] === b[j]) { rows.push([" ", a[i]]); i++; j++; }
+      else if (dp[i + 1][j] >= dp[i][j + 1]) { rows.push(["-", a[i]]); i++; }
+      else { rows.push(["+", b[j]]); j++; }
+    }
+    while (i < n) { rows.push(["-", a[i]]); i++; }
+    while (j < m) { rows.push(["+", b[j]]); j++; }
+    return rows;
+  }
+
+  function render() {
+    var src = input.value;
+    var fixedText = fix(src, opts());
+    lastFixed = fixedText;
+
+    if (mode === "diff") {
+      var rows = diffUnified(src, fixedText);
+      out.innerHTML = rows.map(function (r) {
+        var cls = r[0] === "-" ? "del" : r[0] === "+" ? "add" : "ctx";
+        var mark = r[0] === " " ? "  " : r[0] + " ";
+        return '<span class="' + cls + '">' + escapeHtml(mark + r[1]) + "</span>";
+      }).join("\n");
+      var changed = 0;
+      for (var k = 0; k < rows.length; k++) if (rows[k][0] !== " ") changed++;
+      stats.textContent = changed ? "共 " + changed + " 行有改动" : "没有改动";
+    } else {
+      out.textContent = fixedText;
+      stats.textContent = fixedText === src ? "没有改动" : "已修正";
+    }
+  }
+
+  var timer = null;
+  input.addEventListener("input", function () {
+    clearTimeout(timer);
+    timer = setTimeout(render, 200);
+  });
+
+  ["opt-space", "opt-digits", "opt-cjk", "opt-punct", "opt-trailing", "opt-protect"].forEach(function (id) {
+    document.getElementById(id).addEventListener("change", render);
+  });
+
+  document.getElementById("run").addEventListener("click", render);
+
+  document.getElementById("sample").addEventListener("click", function () {
+    input.value = SAMPLE;
+    render();
+  });
+
+  document.getElementById("clear").addEventListener("click", function () {
+    input.value = "";
+    render();
+  });
+
+  document.getElementById("copy").addEventListener("click", function () {
+    navigator.clipboard.writeText(lastFixed).then(function () {
+      stats.textContent = "已复制到剪贴板";
+    }).catch(function () {
+      stats.textContent = "复制失败（浏览器限制）";
+    });
+  });
+
+  document.getElementById("tab-result").addEventListener("click", function () {
+    mode = "result";
+    this.classList.add("active");
+    document.getElementById("tab-diff").classList.remove("active");
+    render();
+  });
+
+  document.getElementById("tab-diff").addEventListener("click", function () {
+    mode = "diff";
+    this.classList.add("active");
+    document.getElementById("tab-result").classList.remove("active");
+    render();
+  });
+
+  input.value = SAMPLE;
+  render();
+})();
+</script>
+</body>
+</html>

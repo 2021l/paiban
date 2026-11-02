@@ -34,6 +34,7 @@ paiban = "paiban.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/2021l/paiban"
+Demo = "https://2021l.github.io/paiban/"
 Issues = "https://github.com/2021l/paiban/issues"
 
 [tool.hatch.version]
