@@ -18,6 +18,27 @@
 
 演示页由浏览器里的 JS 引擎驱动，规则与 Python 版一一对应（有平价测试保证）。
 
+## 怎么用
+
+| 方式 | 适合 | 入口 |
+| --- | --- | --- |
+| 网页版 | 只想收拾一段文字 | [在线演示](https://2021l.github.io/paiban/) |
+| 双击运行 | 不想装 Python | 下载 `paiban.exe` |
+| 终端命令 | 批量改文件、接进 CI | `paiban -i docs/*.md` |
+| 当库调用 | 写进自己的脚本 | `from paiban import fix` |
+
+### 下载 .exe（Windows）
+
+到 [Releases](https://github.com/2021l/paiban/releases/latest) 下载 `paiban.exe`，
+不需要装 Python，也不需要任何依赖：
+
+- **双击** → 打开图形界面，左边粘贴、右边看结果，还能打开文件和保存
+- **把文件拖到图标上** → 直接处理这个文件，窗口会停留显示结果
+- **在终端里调用** → 和 `paiban` 命令完全一样，例如 `paiban.exe README.md --diff`
+
+单个 exe 约 12 MB。它没有代码签名，首次运行时 Windows 可能提示「Windows 已保护你的电脑」，
+点「更多信息 → 仍要运行」即可。
+
 ## 它解决什么问题
 
 中文和英文挤在一起可读性很差：
@@ -87,6 +108,17 @@ paiban --check docs/   # 有文件需要修正时列出文件名，退出码 1
 | `--no-protect` | 不保护代码块与链接（有风险，一般别用） |
 
 退出码：`0` 正常，`1` 检查发现待修正内容，`2` 读写文件出错。
+
+## 图形界面
+
+不想敲命令的话，装好之后运行：
+
+```bash
+paiban --gui
+```
+
+会打开一个窗口：左边输入、右边输出，顶部那一排开关就是上面这些命令行选项，
+底部可以打开文件、保存结果、复制输出。快捷键 `Ctrl+Enter` 等同于「排版」。
 
 ## 作为库使用
 
@@ -165,6 +197,23 @@ python -m pytest -q         # 安静模式
 ```
 
 测试只依赖标准库里的 `unittest`，装了 `pytest` 也能直接跑。
+
+### 自己打包 exe
+
+Windows 下装好 PyInstaller 后执行：
+
+```powershell
+python -m pip install pyinstaller
+.\packaging\build_exe.ps1
+```
+
+产物在 `dist\paiban.exe`。也可以手动调用：
+
+```bash
+python -m PyInstaller --onefile --name paiban --paths src packaging/paiban_win.py
+```
+
+推 `v*` 标签时 CI 会自动构建并挂到 Release 上，见 `.github/workflows/release-exe.yml`。
 
 ## 许可证
 

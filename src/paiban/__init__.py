@@ -12,5 +12,5 @@ from __future__ import annotations
 
 from .core import fix
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __all__ = ["fix", "__version__"]

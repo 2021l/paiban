@@ -53,6 +53,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--no-protect", action="store_true", help="不保护代码块与 URL（可能改坏示例代码）"
     )
+    parser.add_argument("--gui", action="store_true", help="打开图形界面")
     parser.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
     return parser
 
@@ -111,6 +112,12 @@ def main(argv=None) -> int:
 
     if args.in_place and "-" in targets:
         parser.error("--in-place 需要指定具体文件，不能用于标准输入")
+
+    if args.gui:
+        from .gui import run
+
+        run()
+        return 0
 
     failed = False
     changed = []
