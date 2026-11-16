@@ -3,6 +3,7 @@
 > 一条命令，把中文文档里那些看着别扭的空格修好。
 
 [![CI](https://github.com/2021l/paiban/actions/workflows/ci.yml/badge.svg)](https://github.com/2021l/paiban/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/2021l/paiban.svg)](https://github.com/2021l/paiban/releases/latest)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
